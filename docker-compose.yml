@@ -1,0 +1,89 @@
+version: '3.2'
+
+# Создаем общую сеть, для всех контейнеров
+networks:
+  symfony-networks:
+    driver: bridge
+    external: true
+
+services:
+  php_fpm:
+    container_name: ${APP_PROJECT_NAME}-php-fpm
+    build:
+      context: ./.docker/php-fpm
+      args:
+        APP_ENV: ${APP_ENV}
+    networks:
+      - symfony-networks
+    volumes:
+      - .:/app
+      - ./var/log:/app/var/log
+    working_dir: /app
+    #    ports:
+    #      - "23001:3001"
+    #      - "23000:3000"
+    #    expose:
+    #      - 3001
+    restart: always
+
+  nginx:
+    container_name: ${APP_PROJECT_NAME}-nginx
+    build:
+      context: ./.docker/nginx
+      args:
+        APP_ENV: ${APP_ENV}
+    networks:
+      - symfony-networks
+    ports:
+      - "${APP_WEB_PORT}:${APP_DOCKER_WEB_PORT}"
+    working_dir: /app
+    volumes:
+      - .:/app
+      - ./.certbot/www:/var/www/certbot/:ro
+      - ./.certbot/conf/:/etc/nginx/ssl/:ro
+    volumes_from:
+      - php_fpm
+    restart: always
+
+  mysql:
+    container_name: ${APP_PROJECT_NAME}-mysql
+    image: mysql:5.7
+    # Подключаем к общей сети проекта с другими контейнерами
+    # Connect to the general network of the project with other containers
+    networks:
+      - symfony-networks
+    ports:
+      - "${MYSQL_EXTERNAL_PORT}:${MYSQL_DOCKER_PORT}"
+    environment:
+      - MYSQL_ROOT_PASSWORD=${MYSQL_ROOT_PASSWORD}
+      - MYSQL_DATABASE=${MYSQL_DATABASE}
+      - MYSQL_USER=${MYSQL_USER}
+      - MYSQL_PASSWORD=${MYSQL_PASSWORD}
+    volumes:
+      - "./.docker/mysql:/var/lib/mysql"
+    restart: always
+
+  redis:
+    image: bitnami/redis
+    container_name: ${APP_PROJECT_NAME}-redis
+    networks:
+      - symfony-networks
+    environment:
+      REDIS_PASSWORD: ${REDIS_PASSWORD}
+    ports:
+      - "${REDIS_EXTERNAL_PORT}:${REDIS_DOCKER_PORT}"
+    restart: always
+
+  phpmyadmin:
+    container_name: ${APP_PROJECT_NAME}-phpmyadmin
+    image: phpmyadmin/phpmyadmin
+    ports:
+      - '${PHPMYADMIN_EXTERNAL_PORT}:${PHPMYADMIN_DOCKER_PORT}'
+    networks:
+      - symfony-networks
+    environment:
+      - PMA_ARBITRARY=1
+      - PMA_HOST=mysql
+    depends_on:
+      - mysql
+    restart: always
