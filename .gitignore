@@ -1,3 +1,9 @@
+#
+.idea
+
+#
+/.certbot
+/.docker/mysql
 
 ###> symfony/framework-bundle ###
 /.env.local
