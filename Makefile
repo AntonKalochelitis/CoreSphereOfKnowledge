@@ -28,6 +28,7 @@ stop:
 	docker stop symfony6-mysql
 	docker stop symfony6-redis
 	docker stop symfony6-phpmyadmin
+	docker stop symfony6-postgres
 
 rm:
 	docker rm symfony6-nginx
@@ -35,3 +36,4 @@ rm:
 	docker rm symfony6-mysql
 	docker rm symfony6-redis
 	docker rm symfony6-phpmyadmin
+	docker rm symfony6-postgres
