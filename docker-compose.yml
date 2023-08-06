@@ -39,8 +39,7 @@ services:
     working_dir: /app
     volumes:
       - .:/app
-      - ./.certbot/www:/var/www/certbot/:ro
-      - ./.certbot/conf/:/etc/nginx/ssl/:ro
+      - ./var/logs/nginx/:/var/log/nginx/
     volumes_from:
       - php_fpm
     restart: always
