@@ -35,7 +35,7 @@ services:
     networks:
       - symfony-networks
     ports:
-      - "${APP_WEB_PORT}:${APP_DOCKER_WEB_PORT}"
+      - "${APP_EXTERNAL_WEB_PORT}:${APP_DOCKER_WEB_PORT}"
     working_dir: /app
     volumes:
       - .:/app
